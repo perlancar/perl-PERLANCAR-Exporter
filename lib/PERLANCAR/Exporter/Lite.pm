@@ -20,19 +20,13 @@ sub import {
                                            @{"$exporter\::EXPORT_OK"})) {
                     die "$exp is not exported by $exporter";
                 }
-                if ($exp =~ /\A\$(.+)/) {
-                    *{"$caller\::$1"} = \${"$exporter\::$1"};
-                } elsif ($exp =~ /\A\@(.+)/) {
-                    *{"$caller\::$1"} = \@{"$exporter\::$1"};
-                } elsif ($exp =~ /\A\%(.+)/) {
-                    *{"$caller\::$1"} = \%{"$exporter\::$1"};
-                } elsif ($exp =~ /\A\*(\w+)\z/) {
-                    *{"$caller\::$1"} = *{"$exporter\::$1"};
-                } elsif ($exp =~ /\A&?(\w+)\z/) {
-                    *{"$caller\::$1"} = \&{"$exporter\::$1"};
-                } else {
+                *{"$caller\::$1"} =
+                    $exp =~ /\A\$(.+)/ ? \${"$exporter\::$1"} :
+                    $exp =~ /\A\@(.+)/ ? \@{"$exporter\::$1"} :
+                    $exp =~ /\A\%(.+)/ ? \%{"$exporter\::$1"} :
+                    $exp =~ /\A\*(.+)/ ?  *{"$exporter\::$1"} :
+                    $exp =~ /\A&?(.+)/ ? \&{"$exporter\::$1"} :
                     die "Invalid export '$exp'";
-                }
             }
         };
     }

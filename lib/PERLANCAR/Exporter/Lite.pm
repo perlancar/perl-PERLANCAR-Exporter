@@ -10,17 +10,28 @@ package PERLANCAR::Exporter::Lite;
 sub import {
     my $pkg0 = shift;
     if (@_ && $_[0] eq 'import') {
-        my $caller0 = caller;
-        *{"$caller0\::import"} = sub {
+        my $exporter = caller;
+        *{"$exporter\::import"} = sub {
             my $pkg = shift;
             my $caller = caller;
-            my @imp = @_ ? @_ : @{__PACKAGE__.'::EXPORT'};
-            for my $imp (@imp) {
-                if (grep {$_ eq $imp} (@{__PACKAGE__.'::EXPORT'},
-                                       @{__PACKAGE__.'::EXPORT_OK'})) {
-                    *{"$caller\::$imp"} = \&{$imp};
+            my @exp = @_ ? @_ : @{"$exporter\::EXPORT"};
+            for my $exp (@exp) {
+                unless (grep {$_ eq $exp} (@{"$exporter\::EXPORT"},
+                                           @{"$exporter\::EXPORT_OK"})) {
+                    die "$exp is not exported by $exporter";
+                }
+                if ($exp =~ /\A\$(.+)/) {
+                    *{"$caller\::$1"} = \${"$exporter\::$1"};
+                } elsif ($exp =~ /\A\@(.+)/) {
+                    *{"$caller\::$1"} = \@{"$exporter\::$1"};
+                } elsif ($exp =~ /\A\%(.+)/) {
+                    *{"$caller\::$1"} = \%{"$exporter\::$1"};
+                } elsif ($exp =~ /\A\*(\w+)\z/) {
+                    *{"$caller\::$1"} = *{"$exporter\::$1"};
+                } elsif ($exp =~ /\A&?(\w+)\z/) {
+                    *{"$caller\::$1"} = \&{"$exporter\::$1"};
                 } else {
-                    die "$imp is not exported by ".__PACKAGE__;
+                    die "Invalid export '$exp'";
                 }
             }
         };

@@ -1,8 +1,8 @@
 #!perl
 
-use 5.010;
-use strict 'subs', 'vars';
-use warnings;
+#use 5.010;
+#use strict 'subs', 'vars';
+#use warnings;
 
 use FindBin '$Bin';
 use lib "$Bin/lib";
